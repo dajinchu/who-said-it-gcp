@@ -1,4 +1,5 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
  
@@ -11,22 +12,8 @@ http.listen(8080, function(){
     console.log('listening on *:' + 8080);
 });
 
-// Serve index.html at the root.
-app.get('/', function(req, res){
-    res.sendFile(__dirname + '/index.html');
-});
+app.use(express.static('public'));
 
-app.get('/spectator.html', function(req, res){
-    res.sendFile(__dirname + '/spectator.html');
-});
-
-app.get('/player.html', function(req, res){
-    res.sendFile(__dirname + '/player.html');
-});
-
-app.get('/style.css', function(req, res){
-    res.sendFile(__dirname + '/style.css');
-});
 // Store a mapping between socketId and user names.
 var names = {};
 
