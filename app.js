@@ -66,10 +66,10 @@ player.on('connection', function(socket){
 
             console.log("Display User Scores");
             updateScores(question.answer, answers);
-            setTimeout(sendUserScores, 20000);
+            setTimeout(sendUserScores, 15000);
             
             // Send the new question in 10 seconds.
-           setTimeout(sendNewQuestion, 30000);
+           setTimeout(sendNewQuestion2, 20000);
         }
     });
 });
@@ -110,6 +110,7 @@ function sendUserChoices(){
 function sendUserScores(){
     spectator.emit('user scores', scores);
 }
+
 function sendNewQuestion(){
     responses = {};
     // Make da question.
@@ -145,3 +146,38 @@ function sendNewQuestion(){
     spectator.emit('question', questionToSend);
 }
 
+
+function sendNewQuestion2(){
+    responses = {};
+    // Make da question.
+    var q1 = {
+        choice: "@SHAQ",
+        url: "https://pbs.twimg.com/profile_images/1673907275/image_400x400.jpg"
+    };
+
+     var q2 = {
+        choice: "@jimmykimmel",
+        url: "https://pbs.twimg.com/profile_images/979404042240630785/AcHnkDGC_400x400.jpg"
+    };
+
+     var q3 = {
+        choice: "@VancityReynolds",
+        url: "https://pbs.twimg.com/profile_images/741703039355064320/ClVbjlG-_400x400.jpg"
+    };
+
+     var q4 = {
+        choice: "@britneyspears",
+        url: "https://pbs.twimg.com/profile_images/955803874463571969/-R8etznz_400x400.jpg"
+    };
+    var nquestion = {
+        'question':'If u feel alone and by yourself, look in the mirror, and wow, theres two of you.  Be who you are. Who are you. I am me. Ugly, lol. ',
+        'answer':0,
+        'choices':[q1,q2,q3,q4]};
+    question = nquestion;
+
+    // Clone question but erase answer before sending.
+    var questionToSend = Object.assign({}, nquestion);
+    delete questionToSend.answer;
+    player.emit('question', questionToSend);
+    spectator.emit('question', questionToSend);
+}
