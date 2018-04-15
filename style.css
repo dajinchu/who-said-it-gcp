@@ -1,0 +1,91 @@
+.vertical-center {
+  min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+  min-height: 100vh; /* These two lines are counted as one :-)       */
+
+  display: flex;
+  align-items: center;
+}
+
+body{
+  height: 100%;
+  width: 100%;
+
+}
+
+hr{
+  background-color: white;
+}
+
+.box{
+  padding: 5%;
+  background-color: white;
+}
+
+.dark-back{
+  background-color: #838383;
+}
+
+.light-text{
+  color: white;
+}
+
+.welcomehr{
+  background-color: white;
+}
+
+.rankings {
+  font-size: 1.5rem;
+}
+
+.tweetText {
+  font-size: 1.5em;
+}
+
+#buttonUnderForm{
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+#aboveTweetSpacer{
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+}
+
+.imageButton{
+  max-width: 700px;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap:wrap;
+}
+
+.voteText{
+  font-size: 1.5em;
+}
+
+.voteImg{
+  margin-right: 5%;
+}
+
+.roundButton{
+
+  margin-top: .5rem;
+  width: 9rem;
+  height: 9rem;
+  border:5px solid white;
+  vertical-align: middle;
+
+
+
+}
+
+.dark-hr{
+  background-color: black;
+}
+
+.roundButton:hover{
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.roundButton:active{
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
