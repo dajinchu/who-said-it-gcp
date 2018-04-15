@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+  <link href="style.css" rel="stylesheet">
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+  </head>
+
+  <body>
+
+  <!-- Settings -->
+  <div class="jumbotron jumbotron-fluid vertical-center dark-back light-text" id = "SETTINGS">
+    <div class="container container-fluid">
+      <h1>Start your game </h1>
+      <hr class="my-4">
+        <div class="form-group">
+          <h4>Joined Players</h4>
+          <div id = "joined_players"> </div>
+        </div>
+      <div id="buttonUnderForm">
+        <p class="lead">
+          <a class="btn btn-primary btn-lg" href="#" role="button" id = "startGameNow">Start the game!</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN GAME DIV-->
+  <div class="jumbotron jumbotron-fluid vertical-center"  id = "MAIN_GAME">
+    <div class="container container-fluid">
+      <h1>Who tweeted this tweet?</h1>
+      <hr class="my-4 dark-hr ">
+      <div id="aboveTweetSpacer" class="tweetText">
+        
+      </div>
+      <div class="imageButton">
+        <div class="d-flex flex-column align-items-center">
+          <img src="jaden.jpg" class="roundButton">
+          <div id = "choice_0"> </div>
+        </div>
+        <div class="d-flex flex-column align-items-center">
+          <img src="joe.jpeg" class="roundButton">
+          <div id = "choice_1"> </div>
+        </div>
+        <div class="d-flex flex-column align-items-center">
+          <img src="kanye.jpg" class="roundButton">
+          <div id = "choice_2">  </div>
+        </div>
+        <div class="d-flex flex-column align-items-center">
+          <img src="wendys.jpg" class="roundButton">
+          <div id = "choice_3">  </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<!-- VOTES ARE IN-->
+<div class="jumbotron jumbotron-fluid vertical-center" id = "VOTE_TALLY">
+    <div class="container container-fluid">
+      <h1>The votes are in...</h1>
+      <hr class="my-4 dark-hr ">
+      <div id="aboveTweetSpacer" class="tweetText">
+       
+      </div>
+      <div class="imageButton">
+        <div class="d-flex flex-column align-items-center">
+          <img src="jaden.jpg" class="roundButton">
+          <div id = "choice_0"> </div>
+          <div id = "choice_0_players">  </div>
+        </div>
+        <div class="d-flex flex-column align-items-center">
+          <img src="joe.jpeg" class="roundButton">
+          <div id = "choice_1_players">  </div>
+        </div>
+        <div class="d-flex flex-column align-items-center">
+          <img src="kanye.jpg" class="roundButton">
+          <div id = "choice_2_players">  </div>
+        </div>
+        <div class="d-flex flex-column align-items-center">
+          <img src="wendys.jpg" class="roundButton">
+          <div id = "choice_3_players">  </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<!-- CORRECT ANSWER-->
+<div class="jumbotron jumbotron-fluid vertical-center dark-back" id = "CORRECT_ANSWER_SCREEN">
+    <div class="container container-fluid light-text">
+      <h1 class="display-2">The correct answer is...</h1>
+      <p class="display-4" id = "CorrectAnswer"> </p>
+    </div>
+</div>
+
+  <!-- SCORES DISPLAY-->
+  <div class="jumbotron jumbotron-fluid vertical-center dark-back light-text" id = "SCORES_DISPLAY">
+    <div class="container container-fluid rankings">
+      <h1 class="display-3">Scores</h1>
+      <hr class="my-4" id = "scoreList">
+
+    </div>
+  </div>
+
+
+<!-- WAITING-->
+<div class="jumbotron jumbotron-fluid vertical-center " id = "WAITING">
+    <div class="container container-fluid col-md-offset-3 col-md-6">
+
+      <h1 class="display-3">Waiting...</h1>
+
+
+    </div>
+
+</body>
+  <script src="/socket.io/socket.io.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+<script>
+  $(function () {
+    var socket = io('/spectator');
+
+    // HIDE ALL DIVS
+    $("#SETTINGS").show();
+    $("#MAIN_GAME").hide();
+    $("#VOTE_TALLY").hide();
+    $("#CORRECT_ANSWER_SCREEN").hide();
+    $("#SCORES_DISPLAY").hide();
+    $("#WAITING").hide();
+
+    
+
+
+    // Client to Server
+
+    // Client to Server  
+    $(document).ready(function() {
+
+      // player name
+      $("#startGameNow").click(function(){
+          var name = $('#playerName').val();
+          console.log("registered");
+          socket.emit('start');
+          $("#SETTINGS").hide();
+          $("#WAITING").show();
+      });
+
+      
+
+    });
+
+    // ============== Server to Client =================
+    // Display User List
+    socket.on('user list', function(users){
+      for(var user in users){
+        var msg = users[user];
+        $('#joined_players').append($('<p>').text(msg));
+      }
+    });
+
+     // Display Questions
+    socket.on('question', function(questions){
+      $("#WAITING").hide();
+      $("#MAIN_GAME").show();
+
+      var q = Object.values(questions)[0];
+      var choices = Object.values(questions)[1];
+      $('#aboveTweetSpacer').append($('<p>').text(q));
+
+      for(var choice in choices){
+        var msg = choices[choice];
+        var id = "#choice_"+choice;
+        $(id).append($('<p>').text(msg));
+      }
+    });
+
+    // Display User Choices
+    socket.on('user choices', function(usrChoices){
+      $("#MAIN_GAME").hide();
+      $("#VOTE_TALLY").show();
+
+      for(var user in usrChoices){
+        var msg = user;
+        var id = "#choice_"+usrChoices[user]+"_players";
+        $(id).append($('<p>').text(msg));
+      }
+    });
+
+    // Display Correct Answer
+    socket.on('correct answer', function(answer){
+      $("#VOTE_TALLY").hide();
+      $("#CORRECT_ANSWER_SCREEN").show();
+      $("#CorrectAnswer").append($('<p>').text(answer));
+    });
+
+    // Display User Scores
+    socket.on('user scores', function(usrScores){
+      $("CORRECT_ANSWER_SCREEN").hide();
+      $("SCORES_DISPLAY").show();
+      for(var user in usrScores){
+        var msg = user + ": " + usrScores[user] + "pts";
+        $('#scoreList').append($('<p>').text(msg));
+      }
+    });
+
+ 
+
+    
+
+  });
+</script>
+      
+</html>
