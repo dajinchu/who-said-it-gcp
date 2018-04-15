@@ -159,6 +159,7 @@
     // ============== Server to Client =================
     // Display User List
     socket.on('user list', function(users){
+      $('#joined_players').empty();
       for(var user in users){
         var msg = users[user];
         $('#joined_players').append($('<p>').text(msg));
@@ -177,6 +178,7 @@
       for(var choice in choices){
         var msg = choices[choice];
         var id = "#choice_"+choice;
+        $(id).empty();
         $(id).append($('<p>').text(msg));
       }
     });
@@ -186,9 +188,11 @@
       $("#MAIN_GAME").hide();
       $("#VOTE_TALLY").show();
 
+
       for(var user in usrChoices){
         var msg = user;
         var id = "#choice_"+usrChoices[user]+"_players";
+        $(id).empty();
         $(id).append($('<p>').text(msg));
       }
     });
@@ -197,6 +201,7 @@
     socket.on('correct answer', function(answer){
       $("#VOTE_TALLY").hide();
       $("#CORRECT_ANSWER_SCREEN").show();
+      $('#CorrectAnswer').empty();
       $("#CorrectAnswer").append($('<p>').text(answer));
     });
 
@@ -206,6 +211,7 @@
       $("SCORES_DISPLAY").show();
       for(var user in usrScores){
         var msg = user + ": " + usrScores[user] + "pts";
+        $('#scoreList').empty();
         $('#scoreList').append($('<p>').text(msg));
       }
     });

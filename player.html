@@ -155,11 +155,13 @@
 
       var q = Object.values(questions)[0];
       var choices = Object.values(questions)[1];
+      $('#aboveTweetSpacer').empty();
       $('#aboveTweetSpacer').append($('<p>').text(q));
 
       for(var choice in choices){
         var msg = choices[choice];
         var id = "#choice_"+choice;
+        $(id).empty();
         $(id).append($('<p>').text(msg));
       }
     });
