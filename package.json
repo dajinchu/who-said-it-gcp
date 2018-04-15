@@ -13,6 +13,7 @@
     "url": "https://github.com/dajinchu/who-said-it-gcp.git"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "start": "node app.js"
   }
 }
