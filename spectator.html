@@ -12,6 +12,23 @@
 
   <body>
 
+  <!-- Settings -->
+  <div class="jumbotron jumbotron-fluid vertical-center dark-back light-text" id = "SETTINGS">
+    <div class="container container-fluid">
+      <h1>Start your game </h1>
+      <hr class="my-4">
+        <div class="form-group">
+          <h4>Joined Players</h4>
+          <div id = "joined_players"> </div>
+        </div>
+      <div id="buttonUnderForm">
+        <p class="lead">
+          <a class="btn btn-primary btn-lg" href="#" role="button" id = "startGameNow">Start the game!</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- MAIN GAME DIV-->
   <div class="jumbotron jumbotron-fluid vertical-center"  id = "MAIN_GAME">
     <div class="container container-fluid">
@@ -93,6 +110,15 @@
   </div>
 
 
+<!-- WAITING-->
+<div class="jumbotron jumbotron-fluid vertical-center " id = "WAITING">
+    <div class="container container-fluid col-md-offset-3 col-md-6">
+
+      <h1 class="display-3">Waiting...</h1>
+
+
+    </div>
+
 </body>
   <script src="/socket.io/socket.io.js"></script>
 <script src="/socket.io/socket.io.js"></script>
@@ -102,28 +128,46 @@
     var socket = io('/spectator');
 
     // HIDE ALL DIVS
+    $("#SETTINGS").show();
     $("#MAIN_GAME").hide();
     $("#VOTE_TALLY").hide();
     $("#CORRECT_ANSWER_SCREEN").hide();
     $("#SCORES_DISPLAY").hide();
+    $("#WAITING").hide();
 
     
 
+
     // Client to Server
-    socket.emit("start");
+
+    // Client to Server  
+    $(document).ready(function() {
+
+      // player name
+      $("#startGameNow").click(function(){
+          var name = $('#playerName').val();
+          console.log("registered");
+          socket.emit('start');
+          $("#SETTINGS").hide();
+          $("#WAITING").show();
+      });
+
+      
+
+    });
 
     // ============== Server to Client =================
     // Display User List
     socket.on('user list', function(users){
       for(var user in users){
         var msg = users[user];
-        $('#messages').append($('<li>').text(msg));
+        $('#joined_players').append($('<p>').text(msg));
       }
     });
 
      // Display Questions
     socket.on('question', function(questions){
-
+      $("#WAITING").hide();
       $("#MAIN_GAME").show();
 
       var q = Object.values(questions)[0];
