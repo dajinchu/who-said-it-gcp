@@ -1,7 +1,7 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-
+ 
 // Set up spectating and playing namespsaces for the sockets.
 var spectator = io.of('/spectator');
 var player = io.of('/player');
@@ -22,6 +22,10 @@ app.get('/spectator.html', function(req, res){
 
 app.get('/player.html', function(req, res){
     res.sendFile(__dirname + '/player.html');
+});
+
+app.get('/style.css', function(req, res){
+    res.sendFile(__dirname + '/style.css');
 });
 // Store a mapping between socketId and user names.
 var names = {};
@@ -96,10 +100,29 @@ function updateScores(correctAnswer, userAnswers){
 function sendNewQuestion(){
     responses = {};
     // Make da question.
+    var q1 = {
+        choice: "@Trump",
+        url: "https://cdn.cnn.com/cnnnext/dam/assets/180414083645-07-trump-syria-0413-large-169.jpg"
+    };
+
+     var q2 = {
+        choice: "@Bob",
+        url: "https://cdn.cnn.com/cnnnext/dam/assets/180414083645-07-trump-syria-0413-large-169.jpg"
+    };
+
+     var q3 = {
+        choice: "@Adam",
+        url: "https://cdn.cnn.com/cnnnext/dam/assets/180414083645-07-trump-syria-0413-large-169.jpg"
+    };
+
+     var q4 = {
+        choice: "@Michael",
+        url: "https://cdn.cnn.com/cnnnext/dam/assets/180414083645-07-trump-syria-0413-large-169.jpg"
+    };
     var nquestion = {
         'question':'I am trump',
         'answer':1,
-        'choices':['trump','arun','wendys']};
+        'choices':[q1,q2,q3,q4]};
     question = nquestion;
 
     // Clone question but erase answer before sending.
