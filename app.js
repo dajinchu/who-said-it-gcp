@@ -16,6 +16,13 @@ app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/spectator.html', function(req, res){
+    res.sendFile(__dirname + '/spectator.html');
+});
+
+app.get('/player.html', function(req, res){
+    res.sendFile(__dirname + '/player.html');
+});
 // Store a mapping between socketId and user names.
 var names = {};
 
@@ -35,6 +42,7 @@ player.on('connection', function(socket){
     // player name should receive a string name.
     socket.on('player name', function(name){
         // Check it is valid msg with player info.
+        console.log(name);
         if(typeof name == 'string'){
             names[socket.id] = name;
         } 
@@ -49,6 +57,7 @@ player.on('connection', function(socket){
 
     // Handle user answer. Receives int for answer chosen.
     socket.on('answer selected', function(ans){
+        console.log(ans);
         answers[names[socket.id]] = ans;
 
         // Check if we got answers from everyone.
@@ -78,7 +87,7 @@ function sendUserList(){
 
 function updateScores(correctAnswer, userAnswers){
     for(user in userAnswers){
-        if(userAnswers[user] == corrrectAnswer){
+        if(userAnswers[user] == correctAnswer){
             scores[user] += 100;
         }
     }
