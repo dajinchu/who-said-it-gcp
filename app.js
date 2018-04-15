@@ -7,9 +7,9 @@ var io = require('socket.io')(http);
 var spectator = io.of('/spectator');
 var player = io.of('/player');
 
-// Listen at port 3000.
-http.listen(8080, function(){
-    console.log('listening on *:' + 8080);
+// Listen at port 80.
+http.listen(80, function(){
+    console.log('listening on *:' + 80);
 });
 
 app.use(express.static('public'));
