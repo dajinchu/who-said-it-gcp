@@ -112,7 +112,7 @@ function sendUserScores(){
 }
 
 function sendNewQuestion(){
-    responses = {};
+    answers = {};
     // Make da question.
     var q1 = {
         choice: "@realDonaldTrump",
@@ -148,7 +148,7 @@ function sendNewQuestion(){
 
 
 function sendNewQuestion2(){
-    responses = {};
+    answers = {};
     // Make da question.
     var q1 = {
         choice: "@SHAQ",
