@@ -38,11 +38,13 @@ player.on('connection', function(socket){
         if(typeof name == 'string'){
             names[socket.id] = name;
         } 
+        sendUserList();
     });
     // Delete the user from names{} when disconnect.
     socket.on('disconnect', function(){
         console.log(names[socket.id] + " disconnected");
         delete names[socket.id];
+        sendUserList();
     });
 
     // Handle user answer. Receives int for answer chosen.
@@ -51,7 +53,7 @@ player.on('connection', function(socket){
 
         // Check if we got answers from everyone.
         if(Object.keys(answers).length == Object.keys(names).length){
-            spectator.emit('correct answer', question.answer);
+            spectator.emit('correct answer', question.choices[question.answer]);
             spectator.emit('user choices', answers);
             updateScores(question.answer, answers);
             spectator.emit('user scores', scores);
@@ -68,6 +70,11 @@ spectator.on('connection', function(socket){
         sendNewQuestion();
     });
 });
+
+function sendUserList(){
+    var usrs = Object.keys(names).map(k => names[k]);
+    spectator.emit('user list', usrs);
+}
 
 function updateScores(correctAnswer, userAnswers){
     for(user in userAnswers){
