@@ -49,7 +49,9 @@ player.on('connection', function(socket){
         console.log(name);
         if(typeof name == 'string'){
             names[socket.id] = name;
-        } 
+            scores[name] = 0;
+        }
+
         sendUserList();
     });
     // Delete the user from names{} when disconnect.
@@ -64,14 +66,23 @@ player.on('connection', function(socket){
         console.log(ans);
         answers[names[socket.id]] = ans;
 
+        console.log(Object.keys(answers).length);
+        console.log(Object.keys(names).length);
         // Check if we got answers from everyone.
         if(Object.keys(answers).length == Object.keys(names).length){
-            spectator.emit('correct answer', question.choices[question.answer]);
-            spectator.emit('user choices', answers);
+            console.log("Display User Choices");
+            sendUserChoices();
+            
+
+            console.log("Display Correct Answer");
+            setTimeout(sendCorrectAnswer, 10000);
+
+            console.log("Display User Scores");
             updateScores(question.answer, answers);
-            spectator.emit('user scores', scores);
+            setTimeout(sendUserScores, 20000);
+            
             // Send the new question in 10 seconds.
-            setTimeout(sendNewQuestion, 10000);
+           setTimeout(sendNewQuestion, 30000);
         }
     });
 });
@@ -93,35 +104,50 @@ function updateScores(correctAnswer, userAnswers){
     for(user in userAnswers){
         if(userAnswers[user] == correctAnswer){
             scores[user] += 100;
+            console.log("Score");
+            console.log(scores[user]);
         }
     }
 }
 
+function sendCorrectAnswer(){
+    //spectator.emit('correct answer', question.choices[question.answer]);
+    spectator.emit('correct answer', "@KanyeWest");
+
+}
+
+function sendUserChoices(){
+     spectator.emit('user choices', answers);
+}
+
+function sendUserScores(){
+    spectator.emit('user scores', scores);
+}
 function sendNewQuestion(){
     responses = {};
     // Make da question.
     var q1 = {
-        choice: "@Trump",
+        choice: "@realDonaldTrump",
         url: "https://cdn.cnn.com/cnnnext/dam/assets/180414083645-07-trump-syria-0413-large-169.jpg"
     };
 
      var q2 = {
-        choice: "@Bob",
-        url: "https://cdn.cnn.com/cnnnext/dam/assets/180414083645-07-trump-syria-0413-large-169.jpg"
+        choice: "@officialJaden",
+        url: "https://pbs.twimg.com/profile_images/984869091885199360/Z8xhlToN_400x400.jpg"
     };
 
      var q3 = {
-        choice: "@Adam",
-        url: "https://cdn.cnn.com/cnnnext/dam/assets/180414083645-07-trump-syria-0413-large-169.jpg"
+        choice: "@Wendys",
+        url: "https://pbs.twimg.com/profile_images/905469122674393089/m49BKeBS_400x400.jpg"
     };
 
      var q4 = {
-        choice: "@Michael",
-        url: "https://cdn.cnn.com/cnnnext/dam/assets/180414083645-07-trump-syria-0413-large-169.jpg"
+        choice: "@KanyeWest",
+        url: "https://pbs.twimg.com/profile_images/585565077207678977/N_eNSBXi_400x400.jpg"
     };
     var nquestion = {
-        'question':'I am trump',
-        'answer':1,
+        'question':'I make awesome decisions in bike stores!!!',
+        'answer':3,
         'choices':[q1,q2,q3,q4]};
     question = nquestion;
 

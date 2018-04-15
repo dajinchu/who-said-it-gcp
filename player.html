@@ -114,28 +114,28 @@
       });
 
       // answer selected
-      $("#img0click").click(function(){
+      $("#profilePic0").click(function(){
           console.log("registered img pick 0");
           socket.emit('answer selected', 0);
           $("#MAIN_GAME").hide();
           $("#LOOK_UP").show();
       });
 
-      $("#img1click").click(function(){
+      $("#profilePic1").click(function(){
           console.log("registered img pick 1");
           socket.emit('answer selected', 1);
           $("#MAIN_GAME").hide();
           $("#LOOK_UP").show();
       });
 
-      $("#img2click").click(function(){
+      $("#profilePic2").click(function(){
           console.log("registered img pick 2");
           socket.emit('answer selected', 2);
           $("#MAIN_GAME").hide();
           $("#LOOK_UP").show();
       });
 
-      $("#img3click").click(function(){
+      $("#profilePic3").click(function(){
           console.log("registered img pick 3");
           socket.emit('answer selected', 3);
           $("#MAIN_GAME").hide();

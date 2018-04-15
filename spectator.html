@@ -63,27 +63,30 @@
 <!-- VOTES ARE IN-->
 <div class="jumbotron jumbotron-fluid vertical-center" id = "VOTE_TALLY">
     <div class="container container-fluid">
-      <h1>The votes are in...</h1>
+      <h1>The votes are in!</h1>
       <hr class="my-4 dark-hr ">
       <div id="aboveTweetSpacer" class="tweetText">
        
       </div>
       <div class="imageButton">
         <div class="d-flex flex-column align-items-center">
-          <img src="jaden.jpg" class="roundButton">
-          <div id = "choice_0"> </div>
+          <img src="" class="roundButton" id = "profilePic00">
+          <div id = "choice_00"> </div>
           <div id = "choice_0_players">  </div>
         </div>
         <div class="d-flex flex-column align-items-center">
-          <img src="joe.jpeg" class="roundButton">
+          <img src="" class="roundButton" id = "profilePic01">
+          <div id = "choice_01"> </div>
           <div id = "choice_1_players">  </div>
         </div>
         <div class="d-flex flex-column align-items-center">
-          <img src="kanye.jpg" class="roundButton">
+          <img src="" class="roundButton" id = "profilePic02">
+          <div id = "choice_02"> </div>
           <div id = "choice_2_players">  </div>
         </div>
         <div class="d-flex flex-column align-items-center">
-          <img src="wendys.jpg" class="roundButton">
+          <img src="" class="roundButton" id = "profilePic03">
+          <div id = "choice_03"> </div>
           <div id = "choice_3_players">  </div>
         </div>
       </div>
@@ -126,7 +129,9 @@
 <script>
   $(function () {
     var socket = io('/spectator');
-
+    var theQuestion = "";
+    var choiceArray = {};
+    var urlArray = ["", "", "", ""];
     // HIDE ALL DIVS
     $("#SETTINGS").show();
     $("#MAIN_GAME").hide();
@@ -159,6 +164,7 @@
     // ============== Server to Client =================
     // Display User List
     socket.on('user list', function(users){
+      console.log("Received User List");
       $('#joined_players').empty();
       for(var user in users){
         var msg = users[user];
@@ -172,13 +178,18 @@
       $("#MAIN_GAME").show();
 
       var q = Object.values(questions)[0];
+      theQuestion = q;
       var choices = Object.values(questions)[1];
+
       $('#aboveTweetSpacer').empty();
       $('#aboveTweetSpacer').append($('<p>').text(q));
 
       for(var c in choices){
         var msg = choices[c].choice;
+        choiceArray[c] = msg;
+
         var url = choices[c].url;
+        urlArray[c] = url;
         var urlId = "#profilePic" + c;
         var id = "#choice_"+c;
         $(id).empty();
@@ -192,30 +203,53 @@
       $("#MAIN_GAME").hide();
       $("#VOTE_TALLY").show();
 
+      for(var i = 0; i < 4; i++){
+        var id = "#choice_"+i+"_players";
+        var id2 = "#choice_0"+i;
+        var id3 = "#profilePic0"+i;
+        $(id).empty();
+        $(id2).empty();
+        //$(id3).empty();
+        var url = urlArray[i];
+        $(id3).attr('src',url);
+
+        var handle = choiceArray[i];
+        $(id2).append($('<p>').text(handle));
+        
+
+      }
 
       for(var user in usrChoices){
         var msg = user;
         var id = "#choice_"+usrChoices[user]+"_players";
-        $(id).empty();
+        var id2 = "#choice_0"+usrChoices[user];
+        var id3 = "#profilePic0"+usrChoices[user];
+
+        
+        var url = urlArray[usrChoices[user]];
         $(id).append($('<p>').text(msg));
       }
     });
+    
 
     // Display Correct Answer
     socket.on('correct answer', function(answer){
       $("#VOTE_TALLY").hide();
       $("#CORRECT_ANSWER_SCREEN").show();
+      console.log("SHOW CorrectAnswer")
       $('#CorrectAnswer').empty();
       $("#CorrectAnswer").append($('<p>').text(answer));
     });
 
     // Display User Scores
     socket.on('user scores', function(usrScores){
-      $("CORRECT_ANSWER_SCREEN").hide();
-      $("SCORES_DISPLAY").show();
+      $("#CORRECT_ANSWER_SCREEN").hide();
+      $("#SCORES_DISPLAY").show();
+      console.log("SHOW Score Display")
+      $('#scoreList').empty();
+
       for(var user in usrScores){
         var msg = user + ": " + usrScores[user] + "pts";
-        $('#scoreList').empty();
         $('#scoreList').append($('<p>').text(msg));
       }
     });
