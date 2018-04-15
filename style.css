@@ -12,6 +12,11 @@ body{
 
 }
 
+#USER_INFO, #LOOK_UP, #SETTINGS, #CORRECT_ANSWER_SCREEN, #SCORES_DISPLAY{
+  background-color: #838383;
+  color: white;
+}
+
 hr{
   background-color: white;
 }
