@@ -1,20 +1,28 @@
-class Player {
-    constructor(id){
-        this.id = id;
+const uuid = require('uuid/v1');
+
+module.exports = class Player {
+
+    /**
+     * @param name the name of the player.
+     * @param game a reference to the game object.
+     */
+    constructor(name, game) {
+        this.id = uuid();
+        this.name = name;
+        this.game = game;
         this.score = 0;
     }
 
-    set name(n) {
-        this.name = n;
+    /**
+     * @param answer the string answer to the current question.
+     */
+    answerQuestion(answer) {
+        this.game.answerQuestion(this, answer);
     }
 
-    get name() {
-        return this._name;
-    }
-
-    updateScore(num){
+    updateScore(num) {
         this.score = this.score + num;
     }
 
 
-}
+};

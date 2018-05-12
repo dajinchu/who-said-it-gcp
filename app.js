@@ -2,152 +2,136 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
- 
+var Model = require('./Model');
+
 // Set up spectating and playing namespsaces for the sockets.
 var spectator = io.of('/spectator');
 var player = io.of('/player');
 
 // Listen at port 3000.
-http.listen(3000, function(){
+http.listen(3000, function() {
     console.log('listening on *:' + 3000);
 });
 
 app.use(express.static('public'));
 
-// Store a mapping between socketId and user names.
-var names = {};
 
-// Store a mapping between user name and scores.
-var scores = {};
-
-// Stores the question as {'question':String,'choices': [String]}
-var question = {};
-
-// Stores user responses. Key = username, Value = number
-var answers = {};
+let model = new Model();
 
 // Socket connection for players.
-player.on('connection', function(socket){
+player.on('connection', function(socket) {
     console.log("Player Connected");
 
-    // player name should receive a string name.
-    socket.on('player name', function(name){
+    function onPlayerData(data) {
         // Check it is valid msg with player info.
-        console.log(name);
-        if(typeof name == 'string'){
-            names[socket.id] = name;
-            scores[name] = 0;
+        console.log(data);
+
+        if (!model.roomExists(data.room)) {
+            socket.emit('500', "room does not exist");
+            return;
+        }
+        let room = model.getRoom(data.room);
+        if (room.started) {
+            socket.emit('500', "game already started");
+            return;
         }
 
-        sendUserList();
-    });
-    // Delete the user from names{} when disconnect.
-    socket.on('disconnect', function(){
-        console.log(names[socket.id] + " disconnected");
-        delete names[socket.id];
-        sendUserList();
-    });
+        // Join the socket room
+        socket.join(room.code);
 
-    // Handle user answer. Receives int for answer chosen.
-    socket.on('answer selected', function(ans){
-        console.log(ans);
-        answers[names[socket.id]] = ans;
+        // Leave the socket room if the room (in the model) is closed.
+        room.on('room closed', ()=>{
+            socket.leave(room.code);
+        });
 
-        console.log(Object.keys(answers).length);
-        console.log(Object.keys(names).length);
-        // Check if we got answers from everyone.
-        if(Object.keys(answers).length == Object.keys(names).length){
-            console.log("Display User Choices");
-            sendUserChoices();
-            
+        let mplayer = room.addNewPlayer(data.name);
+        registerPlayerListeners(mplayer);
+    }
 
-            console.log("Display Correct Answer");
-            setTimeout(sendCorrectAnswer, 10000);
+    function registerPlayerListeners(mplayer) {
+        // Handle user answer. Receives int for answer chosen.
+        socket.on('answer selected', onAnswerSelected);
 
-            console.log("Display User Scores");
-            updateScores(question.answer, answers);
-            setTimeout(sendUserScores, 15000);
-            
-            // Send the new question in 10 seconds.
-           setTimeout(sendNewQuestion2, 20000);
+        function onAnswerSelected(ans) {
+            console.log(ans);
+            mplayer.answerQuestion(ans);
         }
-    });
+    }
+
+    // player data should receive a {room:String, name: String}
+    socket.on('player data', onPlayerData);
+
+    socket.on('disconnect', function() {});
 });
 
 // Socket connection for spectators.
-spectator.on('connection', function(socket){
+spectator.on('connection', function(socket) {
     console.log("Spectator Connected");
-    socket.on('start', function(msg){
-        sendNewQuestion();
+    let room = model.createRoom();
+    socket.emit("room code", room.code);
+    socket.join(room.code);
+    onUserChange();
+    console.log("Spectator joining room " + room.code);
+
+    function onReceiveStart(msg) {
+        room.start();
+    }
+    socket.once('start', onReceiveStart);
+
+    function onQuestionClosed() {
+        let scores = Object.keys(room.players).reduce((prev, curr) => {
+            prev[curr] = room.players[curr].score;
+            return prev;
+        }, {});
+        let results = {
+            correct: room.question.correctIndex,
+            scores: scores,
+            choices: room.question.answers
+        };
+        console.log("question finished");
+        player.to(room.code).emit('question closed');
+        spectator.to(room.code).emit('question results', results);
+    }
+
+    function onUserChange() {
+        let usernames = Object.keys(room.players).reduce((prev, curr) => {
+            prev[curr] = {
+                name: room.players[curr].name
+            };
+            return prev;
+        }, {});
+        console.log("user change");
+        spectator.to(room.code).emit('user list', usernames);
+    }
+
+    function onQuestionGenerated(question) {
+        let formattedQuestion = {
+            question: question.prompt,
+            choices: question.options
+        };
+        player.to(room.code).emit('question', formattedQuestion);
+        spectator.to(room.code).emit('question', formattedQuestion);
+    }
+
+    room.on('question closed', onQuestionClosed);
+    room.on('userchange', onUserChange);
+    room.on('question-generated', onQuestionGenerated);
+
+    function onNewQuestionRequested() {
+        room.newQuestion();
+    }
+
+    socket.on('next question',onNewQuestionRequested);
+
+    socket.on('disconnect', () => {
+        console.log("Spectator disconnected");
+        model.closeRoom(room);
+        // Tell clients that the room is closed so they go back to home screen.
+        player.to(room.code).emit('room closed');
     });
 });
 
-function sendUserList(){
-    var usrs = Object.keys(names).map(k => names[k]);
-    spectator.emit('user list', usrs);
-}
-
-function updateScores(correctAnswer, userAnswers){
-    for(user in userAnswers){
-        if(userAnswers[user] == correctAnswer){
-            scores[user] += 100;
-            console.log("Score");
-            console.log(scores[user]);
-        }
-    }
-}
-
-function sendCorrectAnswer(){
-    //spectator.emit('correct answer', question.choices[question.answer]);
-    spectator.emit('correct answer', "@KanyeWest");
-
-}
-
-function sendUserChoices(){
-     spectator.emit('user choices', answers);
-}
-
-function sendUserScores(){
-    spectator.emit('user scores', scores);
-}
-
-function sendNewQuestion(){
-    answers = {};
-    // Make da question.
-    var q1 = {
-        choice: "@realDonaldTrump",
-        url: "https://cdn.cnn.com/cnnnext/dam/assets/180414083645-07-trump-syria-0413-large-169.jpg"
-    };
-
-     var q2 = {
-        choice: "@officialJaden",
-        url: "https://pbs.twimg.com/profile_images/984869091885199360/Z8xhlToN_400x400.jpg"
-    };
-
-     var q3 = {
-        choice: "@Wendys",
-        url: "https://pbs.twimg.com/profile_images/905469122674393089/m49BKeBS_400x400.jpg"
-    };
-
-     var q4 = {
-        choice: "@KanyeWest",
-        url: "https://pbs.twimg.com/profile_images/585565077207678977/N_eNSBXi_400x400.jpg"
-    };
-    var nquestion = {
-        'question':'I make awesome decisions in bike stores!!!',
-        'answer':3,
-        'choices':[q1,q2,q3,q4]};
-    question = nquestion;
-
-    // Clone question but erase answer before sending.
-    var questionToSend = Object.assign({}, nquestion);
-    delete questionToSend.answer;
-    player.emit('question', questionToSend);
-    spectator.emit('question', questionToSend);
-}
-
-
-function sendNewQuestion2(){
+function sendNewQuestion2() {
     answers = {};
     // Make da question.
     var q1 = {
@@ -155,24 +139,25 @@ function sendNewQuestion2(){
         url: "https://pbs.twimg.com/profile_images/1673907275/image_400x400.jpg"
     };
 
-     var q2 = {
+    var q2 = {
         choice: "@jimmykimmel",
         url: "https://pbs.twimg.com/profile_images/979404042240630785/AcHnkDGC_400x400.jpg"
     };
 
-     var q3 = {
+    var q3 = {
         choice: "@VancityReynolds",
         url: "https://pbs.twimg.com/profile_images/741703039355064320/ClVbjlG-_400x400.jpg"
     };
 
-     var q4 = {
+    var q4 = {
         choice: "@britneyspears",
         url: "https://pbs.twimg.com/profile_images/955803874463571969/-R8etznz_400x400.jpg"
     };
     var nquestion = {
-        'question':'If u feel alone and by yourself, look in the mirror, and wow, theres two of you.  Be who you are. Who are you. I am me. Ugly, lol. ',
-        'answer':0,
-        'choices':[q1,q2,q3,q4]};
+        'question': 'If u feel alone and by yourself, look in the mirror, and wow, theres two of you.  Be who you are. Who are you. I am me. Ugly, lol. ',
+        'answer': 0,
+        'choices': [q1, q2, q3, q4]
+    };
     question = nquestion;
 
     // Clone question but erase answer before sending.

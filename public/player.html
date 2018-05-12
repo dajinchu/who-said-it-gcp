@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Socket.IO chat</title>
+  <title>Identity Crisis</title>
   <link href="style.css" rel="stylesheet">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,7 +22,7 @@
       <form>
         <div class="form-group">
           <label>Room Code</label>
-          <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Enter the room code">
+          <input type="text" class="form-control" id="roomCode" placeholder="Enter the room code">
         </div>
         <div class="form-group">
           <label>Name</label>
@@ -102,14 +102,18 @@
 
 
 
-    // Client to Server  
+    // Client to Server
     $(document).ready(function() {
 
       // player name
       $("#joinButton").click(function() {
         var name = $('#playerName').val();
+        var room = $('#roomCode').val().toUpperCase();
         console.log("registered");
-        socket.emit('player name', name);
+        socket.emit('player data', {
+          name: name,
+          room: room
+        });
         $("#USER_INFO").hide();
         $("#LOOK_UP").show();
       });
@@ -169,6 +173,17 @@
         $(id).append($('<p>').text(msg));
         $(urlId).attr('src', url);
       }
+    });
+
+    socket.on('question closed', function () {
+        $("#MAIN_GAME").hide();
+        $("#LOOK_UP").show();
+    })
+
+    socket.on('room closed', function() {
+      $("#LOOK_UP").hide();
+      $("#MAIN_GAME").hide();
+      $("#USER_INFO").show();
     });
 
   });
