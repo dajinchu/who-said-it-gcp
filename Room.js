@@ -65,6 +65,8 @@ module.exports = class Room extends EventEmitter {
     }
 
     endQuestion(){
+        // Check if this question hasn't been already been closed.
+        // This is so we don't emit question closed multiple times ever.
         if(!this.questionClosed){
             this.applyQuestionGrades();
             this.emit('question closed');

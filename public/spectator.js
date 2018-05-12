@@ -63,6 +63,8 @@ $(function() {
         $('#aboveTweetSpacer').empty();
         $('#aboveTweetSpacer').append($('<p>').text(q));
 
+        setAnswerTimer(10);
+
         for (var c in choices) {
             var msg = choices[c].choice;
             choiceArray[c] = msg;
@@ -76,6 +78,17 @@ $(function() {
             $(urlId).attr('src', url);
         }
     });
+
+    function setAnswerTimer(timeleft) {
+        function update() {
+            timeleft--;
+            $("#countdowntimer").text(timeleft);
+            if (timeleft <= 0)
+                clearInterval(count);
+        }
+        let count = setInterval(update, 1000);
+        update();
+    }
 
     socket.on('question results', function(results) {
         console.log(results);
@@ -134,7 +147,7 @@ $(function() {
     }
 
     // Ask for the next question
-    function requestNextQuestion(){
+    function requestNextQuestion() {
         socket.emit('next question');
     }
 
